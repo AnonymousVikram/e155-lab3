@@ -12,55 +12,48 @@ module sevenSegController (
     output logic [3:0] curVal,
     oldVal
 );
+  logic [3:0] nextCurVal, nextOldVal, curValBuffer;
 
-  logic [3:0] inputBuffer;
-
-  typedef enum logic [2:0] {
+  typedef enum logic [1:0] {
     WAITING,
     INPUT,
-    HOLDING
-  } fsmStates_t;
+    HOLD
+  } fsmstates_t;
 
-  fsmStates_t curState, nextState;
+  fsmstates_t curState, nextState;
 
-  assign curVal = inputBuffer;
+  assign nextCurVal = keyInput;
+  assign nextOldVal = curValBuffer;
+  assign curVal = curValBuffer;
 
-  always_ff @(posedge clk) begin : overallLogic
+  always_ff @(posedge clk) begin : stateController
     if (~nreset) begin
-      curState <= WAITING;
-    end else begin
-      curState <= nextState;
-    end
-  end
-
-  always_comb begin : outputLogic
-    if (~nreset) begin
-      oldVal = 0;
-      inputBuffer = 0;
+      curState  <= WAITING;
+      nextState <= WAITING;
     end else begin
       case (curState)
         WAITING: begin
           if (keyInputValid) begin
-            oldVal = inputBuffer;
-            inputBuffer = keyInput;
-          end
+            nextState <= INPUT;
+          end else nextState <= WAITING;
         end
-        default: inputBuffer = inputBuffer;
+        INPUT, HOLD: nextState <= (keyInputValid && keyInput == curVal) ? HOLD : WAITING;
+        default: begin
+          nextState <= WAITING;
+        end
       endcase
     end
+    curState <= nextState;
   end
 
-  always_comb begin : nextStateLogic
+  always_ff @(posedge clk) begin
     if (~nreset) begin
-      nextState = WAITING;
-    end else begin
-      case (curState)
-        WAITING: nextState = keyInputValid ? INPUT : WAITING;
-        INPUT, HOLDING: nextState = (keyInputValid && keyInput == inputBuffer) ? HOLDING : WAITING;
-        default: nextState = WAITING;
-      endcase
+      curValBuffer <= 'bz;
+      oldVal <= 'bz;
+    end else if (nextState == INPUT) begin
+      oldVal <= nextOldVal;
+      curValBuffer <= nextCurVal;
     end
   end
-
 
 endmodule

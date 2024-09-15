@@ -43,10 +43,10 @@ module keypadDecoder (
     if (~nreset) cols = 'b1111;
     else
       case (state)
-        COL1: cols = 'b0001;
-        COL2: cols = 'b0010;
-        COL3: cols = 'b0100;
-        COL4: cols = 'b1000;
+        COL1: cols = 'b1110;
+        COL2: cols = 'b1101;
+        COL3: cols = 'b1011;
+        COL4: cols = 'b0111;
         default: cols = 'bz;
       endcase
   end
@@ -61,72 +61,72 @@ module keypadDecoder (
       case ({
         rows, cols
       })
-        8'b0001_0001: begin
-          keyInput = 'h1;
-          keyInputValid = 'b1;
+        'b1110_1110: begin
+          keyInputValid = 1;
+          keyInput = 4'h1;
         end
-        8'b0001_0010: begin
-          keyInput = 'h2;
-          keyInputValid = 'b1;
+        'b1101_1110: begin
+          keyInputValid = 1;
+          keyInput = 4'h2;
         end
-        8'b0001_0100: begin
-          keyInput = 'h3;
-          keyInputValid = 'b1;
+        'b1011_1110: begin
+          keyInputValid = 1;
+          keyInput = 4'h3;
         end
-        8'b0001_1000: begin
-          keyInput = 'hA;
-          keyInputValid = 'b1;
+        'b0111_1110: begin
+          keyInputValid = 1;
+          keyInput = 4'hA;
         end
-        8'b0010_0001: begin
-          keyInput = 'h4;
-          keyInputValid = 'b1;
+        'b1110_1101: begin
+          keyInputValid = 1;
+          keyInput = 4'h4;
         end
-        8'b0010_0010: begin
-          keyInput = 'h5;
-          keyInputValid = 'b1;
+        'b1101_1101: begin
+          keyInputValid = 1;
+          keyInput = 4'h5;
         end
-        8'b0010_0100: begin
-          keyInput = 'h6;
-          keyInputValid = 'b1;
+        'b1011_1101: begin
+          keyInputValid = 1;
+          keyInput = 4'h6;
         end
-        8'b0010_1000: begin
-          keyInput = 'hB;
-          keyInputValid = 'b1;
+        'b0111_1101: begin
+          keyInputValid = 1;
+          keyInput = 4'hB;
         end
-        8'b0100_0001: begin
-          keyInput = 'h7;
-          keyInputValid = 'b1;
+        'b1110_1011: begin
+          keyInputValid = 1;
+          keyInput = 4'h7;
         end
-        8'b0100_0010: begin
-          keyInput = 'h8;
-          keyInputValid = 'b1;
+        'b1101_1011: begin
+          keyInputValid = 1;
+          keyInput = 4'h8;
         end
-        8'b0100_0100: begin
-          keyInput = 'h9;
-          keyInputValid = 'b1;
+        'b1011_1011: begin
+          keyInputValid = 1;
+          keyInput = 4'h9;
         end
-        8'b0100_1000: begin
-          keyInput = 'hC;
-          keyInputValid = 'b1;
+        'b0111_1011: begin
+          keyInputValid = 1;
+          keyInput = 4'hC;
         end
-        8'b1000_0001: begin
-          keyInput = 'hE;
-          keyInputValid = 'b1;
+        'b1110_0111: begin
+          keyInputValid = 1;
+          keyInput = 4'hE;
         end
-        8'b1000_0010: begin
-          keyInput = 'h0;
-          keyInputValid = 'b1;
+        'b1101_0111: begin
+          keyInputValid = 1;
+          keyInput = 4'h0;
         end
-        8'b1000_0100: begin
-          keyInput = 'hF;
-          keyInputValid = 'b1;
+        'b1011_0111: begin
+          keyInputValid = 1;
+          keyInput = 4'hF;
         end
-        8'b1000_1000: begin
-          keyInput = 'hD;
-          keyInputValid = 'b1;
+        'b0111_0111: begin
+          keyInputValid = 1;
+          keyInput = 4'hD;
         end
         default: begin
-          keyInput = 4'b0;
+          keyInput = 4'bzzzz;
           keyInputValid = 0;
         end
       endcase
