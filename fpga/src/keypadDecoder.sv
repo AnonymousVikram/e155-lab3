@@ -19,119 +19,106 @@ module keypadDecoder (
     COL4
   } colscanstates_t;
 
-  colscanstates_t state, nextState;
+  colscanstates_t curState, nextState;
 
-  // next state logic
-  always_ff @(posedge clk) begin : register
+  always_comb begin : colOutput
+    case (curState)
+      COL1: cols = 4'b1110;
+      COL2: cols = 4'b1101;
+      COL3: cols = 4'b1011;
+      COL4: cols = 4'b0111;
+      default: cols = 4'b1111;
+    endcase
+  end
+
+  always_ff @(posedge clk) begin : stateController
     if (~nreset) begin
-      state <= COL1;
+      curState  <= COL1;
       nextState <= COL1;
     end else begin
-      state <= nextState;
-      case (state)
-        COL1: nextState <= COL2;
-        COL2: nextState <= COL3;
-        COL3: nextState <= COL4;
-        COL4: nextState <= COL1;
-        default: nextState <= COL1;
+      case (curState)
+        COL1: nextState <= rows == 4'b1111 ? COL2 : COL1;
+        COL2: nextState <= rows == 4'b1111 ? COL3 : COL2;
+        COL3: nextState <= rows == 4'b1111 ? COL4 : COL3;
+        COL4: nextState <= rows == 4'b1111 ? COL1 : COL4;
       endcase
+      curState <= nextState;
     end
   end
-
-  // Output logic for cols
-  always_comb begin : colOutputLogic
-    if (~nreset) cols = 'b1111;
-    else
-      case (state)
-        COL1: cols = 'b1110;
-        COL2: cols = 'b1101;
-        COL3: cols = 'b1011;
-        COL4: cols = 'b0111;
-        default: cols = 'bz;
-      endcase
-  end
-
-  // Output logic for keyInput
 
   always_comb begin : keyInputLogic
-    if (~nreset) begin
-      keyInput = 'b0000;
-      keyInputValid = 'b0;
-    end else begin
-      case ({
-        rows, cols
-      })
-        'b1110_1110: begin
-          keyInputValid = 1;
-          keyInput = 4'h1;
-        end
-        'b1101_1110: begin
-          keyInputValid = 1;
-          keyInput = 4'h2;
-        end
-        'b1011_1110: begin
-          keyInputValid = 1;
-          keyInput = 4'h3;
-        end
-        'b0111_1110: begin
-          keyInputValid = 1;
-          keyInput = 4'hA;
-        end
-        'b1110_1101: begin
-          keyInputValid = 1;
-          keyInput = 4'h4;
-        end
-        'b1101_1101: begin
-          keyInputValid = 1;
-          keyInput = 4'h5;
-        end
-        'b1011_1101: begin
-          keyInputValid = 1;
-          keyInput = 4'h6;
-        end
-        'b0111_1101: begin
-          keyInputValid = 1;
-          keyInput = 4'hB;
-        end
-        'b1110_1011: begin
-          keyInputValid = 1;
-          keyInput = 4'h7;
-        end
-        'b1101_1011: begin
-          keyInputValid = 1;
-          keyInput = 4'h8;
-        end
-        'b1011_1011: begin
-          keyInputValid = 1;
-          keyInput = 4'h9;
-        end
-        'b0111_1011: begin
-          keyInputValid = 1;
-          keyInput = 4'hC;
-        end
-        'b1110_0111: begin
-          keyInputValid = 1;
-          keyInput = 4'hE;
-        end
-        'b1101_0111: begin
-          keyInputValid = 1;
-          keyInput = 4'h0;
-        end
-        'b1011_0111: begin
-          keyInputValid = 1;
-          keyInput = 4'hF;
-        end
-        'b0111_0111: begin
-          keyInputValid = 1;
-          keyInput = 4'hD;
-        end
-        default: begin
-          keyInput = 4'bzzzz;
-          keyInputValid = 0;
-        end
-      endcase
-    end
+    case ({
+      rows, cols
+    })
+      8'b1110_1110: begin
+        keyInput = 4'h1;
+        keyInputValid = 1;
+      end
+      8'b1110_1101: begin
+        keyInput = 4'h2;
+        keyInputValid = 1;
+      end
+      8'b1110_1011: begin
+        keyInput = 4'h3;
+        keyInputValid = 1;
+      end
+      8'b1110_0111: begin
+        keyInput = 4'hA;
+        keyInputValid = 1;
+      end
+      8'b1101_1110: begin
+        keyInput = 4'h4;
+        keyInputValid = 1;
+      end
+      8'b1101_1101: begin
+        keyInput = 4'h5;
+        keyInputValid = 1;
+      end
+      8'b1101_1011: begin
+        keyInput = 4'h6;
+        keyInputValid = 1;
+      end
+      8'b1101_0111: begin
+        keyInput = 4'hB;
+        keyInputValid = 1;
+      end
+      8'b1011_1110: begin
+        keyInput = 4'h7;
+        keyInputValid = 1;
+      end
+      8'b1011_1101: begin
+        keyInput = 4'h8;
+        keyInputValid = 1;
+      end
+      8'b1011_1011: begin
+        keyInput = 4'h9;
+        keyInputValid = 1;
+      end
+      8'b1011_0111: begin
+        keyInput = 4'hC;
+        keyInputValid = 1;
+      end
+      8'b0111_1110: begin
+        keyInput = 4'hE;
+        keyInputValid = 1;
+      end
+      8'b0111_1101: begin
+        keyInput = 4'h0;
+        keyInputValid = 1;
+      end
+      8'b0111_1011: begin
+        keyInput = 4'hF;
+        keyInputValid = 1;
+      end
+      8'b0111_0111: begin
+        keyInput = 4'hD;
+        keyInputValid = 1;
+      end
+      default: begin
+        keyInput = 4'h8;
+        keyInputValid = 0;
+      end
+    endcase
   end
-
 
 endmodule

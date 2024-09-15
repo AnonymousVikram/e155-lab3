@@ -47,6 +47,13 @@ module lab3_vk (
       .nreset(nreset),
       .keyInputValid(keyInputValid),
       .keyInput(keyInput),
+      .curVal(curVal)
+  );
+
+  sevenSegOld sevenSegOldMod (
+      .clk(clkDiv),
+      .nreset(nreset),
+      .keyInputValid(keyInputValid),
       .curVal(curVal),
       .oldVal(oldVal)
   );
@@ -54,7 +61,7 @@ module lab3_vk (
   //* Instantiate seven segment decoder
   logic [3:0] segDecoderInput;
 
-  assign segDecoderInput = clkDiv ? oldVal : curVal;
+  assign segDecoderInput = clkDiv ? curVal : oldVal;
 
   sevenSegmentDecoder sevenSegmentDecoderMod (
       .inputHex(segDecoderInput),

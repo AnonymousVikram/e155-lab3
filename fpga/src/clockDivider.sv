@@ -16,6 +16,7 @@ module clockDivider #(
   always_ff @(posedge clk) begin
     if (!nreset) begin
       counter <= 0;
+      clkDiv  <= 1'b0;
     end else if (counter > CLOCKWAIT) begin
       clkDiv  <= ~clkDiv;
       counter <= 0;
