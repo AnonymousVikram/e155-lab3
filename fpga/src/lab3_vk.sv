@@ -1,9 +1,9 @@
 module lab3_vk (
     input logic [3:0] rows,
-    cols,
     input logic nreset,
     output logic lSegEn,
     rSegEn,
+    output logic [3:0] cols,
     output logic [6:0] seg
 );
 
@@ -20,7 +20,7 @@ module lab3_vk (
 
   //* Slowing down the clk
   logic clkDiv;
-  clockDivider clkDivMod (
+  clockDivider #('d100000) clkDivMod (
       .clk(clk),
       .nreset(nreset),
       .clkDiv(clkDiv)
@@ -34,6 +34,8 @@ module lab3_vk (
   logic [3:0] keyInput, curVal, oldVal;
   logic keyInputValid;
   keypadDecoder keypadDecoderMod (
+      .clk(clkDiv),
+      .nreset(nreset),
       .rows(rows),
       .cols(cols),
       .keyInput(keyInput),
