@@ -42,18 +42,22 @@ module lab3_vk (
       .keyInputValid(keyInputValid)
   );
 
+  logic curValChanged;
+
   sevenSegController sevenSegControllerMod (
       .clk(clkDiv),
       .nreset(nreset),
       .keyInputValid(keyInputValid),
       .keyInput(keyInput),
-      .curVal(curVal)
+      .curVal(curVal),
+      .curValChanged(curValChanged)
   );
+
 
   sevenSegOld sevenSegOldMod (
       .clk(clkDiv),
       .nreset(nreset),
-      .keyInputValid(keyInputValid),
+      .keyInputValid(curValChanged),
       .curVal(curVal),
       .oldVal(oldVal)
   );

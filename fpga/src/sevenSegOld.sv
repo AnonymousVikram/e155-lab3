@@ -14,13 +14,13 @@ module sevenSegOld (
   // Implement a shift register to store the old value
   logic [3:0] curValBuffer, oldValBuffer;
 
-  always_ff @(posedge clk) begin : shiftRegister
+  always_ff @(posedge keyInputValid) begin : shiftRegister
     if (~nreset) begin
       curValBuffer <= 4'h8;
       oldValBuffer <= 4'h8;
     end else begin
-      curValBuffer <= keyInputValid ? curVal : curValBuffer;
-      oldValBuffer <= curValBuffer == curVal ? oldValBuffer : curValBuffer;
+      curValBuffer <= curVal;
+      oldValBuffer <= curValBuffer;
     end
   end
 

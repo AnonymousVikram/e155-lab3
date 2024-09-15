@@ -9,7 +9,8 @@ module sevenSegController (
     nreset,
     keyInputValid,
     input logic [3:0] keyInput,
-    output logic [3:0] curVal
+    output logic [3:0] curVal,
+    output logic curValChanged
 );
 
   logic [3:0] valBuffer;
@@ -35,7 +36,8 @@ module sevenSegController (
         HOLD:    nextState <= keyInputValid ? HOLD : WAITING;
       endcase
       curState <= nextState;
-      curVal   <= keyInputValid ? keyInput : curVal;
+      curVal <= keyInputValid ? keyInput : curVal;
+      curValChanged <= nextState == INPUT;
     end
   end
 
