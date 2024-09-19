@@ -4,47 +4,65 @@
 * Summary: SystemVerilog to decode a 16 input keypad
 */
 
-module keypadDecoder (
+module valueFSM (
     input logic clk,
     nreset,
     input logic [3:0] rows,
+    input logic [3:0] curVal,
     output logic [3:0] cols,
-    keyInput,
+    output logic [3:0] keyInput,
     output logic keyInputValid
 );
-  typedef enum logic [1:0] {
-    COL1,
-    COL2,
-    COL3,
-    COL4
-  } colscanstates_t;
 
-  colscanstates_t curState, nextState;
+  logic [1:0] columnCounter;
+
+  typedef enum logic [1:0] {
+    WAIT,
+    INPUT,
+    HOLD,
+    DEBOUNCE
+  } fsmstates_t;
+
+  fsmstates_t curState, nextState;
 
   always_comb begin : colOutput
-    case (curState)
-      COL1: cols = 4'b1110;
-      COL2: cols = 4'b1101;
-      COL3: cols = 4'b1011;
-      COL4: cols = 4'b0111;
+    case (columnCounter)
+      'b00: cols = 4'b1110;
+      'b01: cols = 4'b1101;
+      'b10: cols = 4'b1011;
+      'b11: cols = 4'b0111;
       default: cols = 4'b1111;
     endcase
   end
 
   always_ff @(posedge clk) begin : stateController
     if (~nreset) begin
-      curState  <= COL1;
-      nextState <= COL1;
+      curState <= WAIT;
     end else begin
-      case (curState)
-        COL1: nextState <= rows == 4'b1111 ? COL2 : COL1;
-        COL2: nextState <= rows == 4'b1111 ? COL3 : COL2;
-        COL3: nextState <= rows == 4'b1111 ? COL4 : COL3;
-        COL4: nextState <= rows == 4'b1111 ? COL1 : COL4;
-      endcase
       curState <= nextState;
     end
   end
+
+  always_comb begin : nextStateLogic
+    case (curState)
+      WAIT: nextState = rows == 4'b1111 ? INPUT : WAIT;
+      INPUT: nextState = rows == 4'b1111 ? WAIT : HOLD;
+      HOLD: nextState = rows == 4'b1111 ? DEBOUNCE : HOLD;
+      DEBOUNCE: nextState = rows == 4'b1111 || keyInput != curVal ? WAIT : HOLD;
+      default: nextState = WAIT;
+    endcase
+  end
+
+  always_ff @(posedge clk) begin : counterLogic
+    if (~nreset) begin
+      columnCounter <= 2'b00;
+    end else if (curState == WAIT) begin
+      columnCounter <= columnCounter == 2'b11 ? 2'b00 : columnCounter + 1;
+    end
+  end
+
+  logic validKeyCombo;
+  assign keyInputValid = curState == INPUT && validKeyCombo;
 
   always_comb begin : keyInputLogic
     case ({
@@ -52,71 +70,71 @@ module keypadDecoder (
     })
       8'b1110_1110: begin
         keyInput = 4'h1;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1110_1101: begin
         keyInput = 4'h2;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1110_1011: begin
         keyInput = 4'h3;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1110_0111: begin
         keyInput = 4'hA;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1101_1110: begin
         keyInput = 4'h4;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1101_1101: begin
         keyInput = 4'h5;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1101_1011: begin
         keyInput = 4'h6;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1101_0111: begin
         keyInput = 4'hB;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1011_1110: begin
         keyInput = 4'h7;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1011_1101: begin
         keyInput = 4'h8;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1011_1011: begin
         keyInput = 4'h9;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b1011_0111: begin
         keyInput = 4'hC;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b0111_1110: begin
         keyInput = 4'hE;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b0111_1101: begin
         keyInput = 4'h0;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b0111_1011: begin
         keyInput = 4'hF;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       8'b0111_0111: begin
         keyInput = 4'hD;
-        keyInputValid = 1;
+        validKeyCombo = 1;
       end
       default: begin
-        keyInput = 4'h8;
-        keyInputValid = 0;
+        keyInput = 4'hx;
+        validKeyCombo = 0;
       end
     endcase
   end

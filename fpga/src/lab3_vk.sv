@@ -27,7 +27,7 @@ module lab3_vk (
   );
 
   logic clkDiv48;  // 48Hz clock for keypad
-  clockDivider #('d400000) clkDivMod48 (
+  clockDivider #('d250000) clkDivMod48 (
       .clk(clk),
       .nreset(nreset),
       .clkDiv(clkDiv48)
@@ -37,36 +37,39 @@ module lab3_vk (
   assign lSegEn = clkDiv240;
   assign rSegEn = ~clkDiv240;
 
-  //* Configuring the keypad decoder and FSM
   logic [3:0] keyInput, curVal, oldVal;
   logic keyInputValid;
-  keypadDecoder keypadDecoderMod (
+
+  //* Setting up the flops for the values
+  flopenr #(
+      .BITS(4)
+  ) valueFlop (
+      .clk(clkDiv48),
+      .nreset(nreset),
+      .enable(keyInputValid),
+      .d(keyInput),
+      .q(curVal)
+  );
+
+  flopenr #(
+      .BITS(4)
+  ) valueFlopOld (
+      .clk(clkDiv48),
+      .nreset(nreset),
+      .enable(keyInputValid),
+      .d(curVal),
+      .q(oldVal)
+  );
+
+  //* Configuring the keypad decoder and FSM
+  valueFSM valueFSMMod (
       .clk(clkDiv48),
       .nreset(nreset),
       .rows(rows),
+      .curVal(curVal),
       .cols(cols),
       .keyInput(keyInput),
       .keyInputValid(keyInputValid)
-  );
-
-  logic curValChanged;
-
-  sevenSegController sevenSegControllerMod (
-      .clk(clkDiv48),
-      .nreset(nreset),
-      .keyInputValid(keyInputValid),
-      .keyInput(keyInput),
-      .curVal(curVal),
-      .curValChanged(curValChanged)
-  );
-
-
-  sevenSegOld sevenSegOldMod (
-      .clk(clkDiv48),
-      .nreset(nreset),
-      .keyInputValid(curValChanged),
-      .curVal(curVal),
-      .oldVal(oldVal)
   );
 
   //* Instantiate seven segment decoder
