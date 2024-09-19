@@ -37,12 +37,14 @@ module valueFSM (
   fsmstates_t curState, nextState;
 
   always_comb begin : colOutput
-    unique case (columnCounter)
-      'b00: cols = 4'b1110;
-      'b01: cols = 4'b1101;
-      'b10: cols = 4'b1011;
-      'b11: cols = 4'b0111;
-    endcase
+    if (curState == WAIT) begin
+      unique case (columnCounter)
+        'b00: cols = 4'b1110;
+        'b01: cols = 4'b1101;
+        'b10: cols = 4'b1011;
+        'b11: cols = 4'b0111;
+      endcase
+    end else cols = 4'b0000;
   end
 
   always_ff @(posedge clk) begin : stateController
