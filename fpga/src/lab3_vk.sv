@@ -27,7 +27,7 @@ module lab3_vk (
   );
 
   logic clkDiv48;  // 48Hz clock for keypad
-  clockDivider #('d250000) clkDivMod48 (
+  clockDivider #('d500000) clkDivMod48 (
       .clk(clk),
       .nreset(nreset),
       .clkDiv(clkDiv48)
@@ -42,7 +42,7 @@ module lab3_vk (
 
   //* Setting up the flops for the values
   flopenr #(
-      .BITS(4)
+      .BITS('d4)
   ) valueFlop (
       .clk(clkDiv48),
       .nreset(nreset),
@@ -52,7 +52,7 @@ module lab3_vk (
   );
 
   flopenr #(
-      .BITS(4)
+      .BITS('d4)
   ) valueFlopOld (
       .clk(clkDiv48),
       .nreset(nreset),
