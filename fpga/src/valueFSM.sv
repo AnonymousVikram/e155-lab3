@@ -43,25 +43,27 @@ module valueFSM (
     end
   end
 
+  logic validKeyCombo;
+
   always_comb begin : nextStateLogic
     case (curState)
-      WAIT: nextState = rows == 4'b1111 ? INPUT : WAIT;
-      INPUT: nextState = rows == 4'b1111 ? WAIT : HOLD;
+      WAIT: nextState = rows == 4'b1111 ? WAIT : INPUT;
+      INPUT: nextState = rows == 4'b1111 ? DEBOUNCE : HOLD;
       HOLD: nextState = rows == 4'b1111 ? DEBOUNCE : HOLD;
-      DEBOUNCE: nextState = rows == 4'b1111 || keyInput != curVal ? WAIT : HOLD;
+      DEBOUNCE: nextState = rows == 4'b1111 ? WAIT : HOLD;
       default: nextState = WAIT;
     endcase
   end
 
+
   always_ff @(posedge clk) begin : counterLogic
     if (~nreset) begin
       columnCounter <= 2'b00;
-    end else if (curState == WAIT) begin
+    end else if (nextState == WAIT) begin
       columnCounter <= columnCounter == 2'b11 ? 2'b00 : columnCounter + 1;
     end
   end
 
-  logic validKeyCombo;
   assign keyInputValid = curState == INPUT && validKeyCombo;
 
   always_comb begin : keyInputLogic

@@ -17,7 +17,7 @@ module clockDivider #(
     if (!nreset) begin
       counter <= 0;
       clkDiv  <= 1'b0;
-    end else if (counter > CLOCKWAIT) begin
+    end else if (counter == CLOCKWAIT) begin
       clkDiv  <= ~clkDiv;
       counter <= 0;
     end else counter <= counter + 1;
